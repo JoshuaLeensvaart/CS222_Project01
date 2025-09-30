@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#Authors: Troy House, Joshua Leensvaart
 import sys
 import argparse
 import requests
@@ -43,3 +43,4 @@ def main(argv):
         sys.exit(1)
 
 main(sys.argv[1:])
+
