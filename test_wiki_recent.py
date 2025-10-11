@@ -1,21 +1,22 @@
 import unittest
-from wiki_recent import get_recent_changes
+from wiki_recent import get_wikipedia_data 
+
 
 class TestWikiRecent(unittest.TestCase):
 
     def test_valid_article(self):
-        """Check that a known article returns a query key."""
-        data = get_recent_changes("Ball State University")
-        self.assertIn("query", data)
-
-    def test_invalid_article(self):
-        """Check that a fake article still returns query with pages info."""
-        data = get_recent_changes("ThisArticleDoesNotExist123456")
+        """Check that a real article returns valid query data."""
+        data = get_wikipedia_data("Ball State University")
         self.assertIn("query", data)
 
     def test_redirect_article(self):
-        """Check that redirects (like BSU) still return valid data."""
-        data = get_recent_changes("BSU")
+        """Check that a redirect (like 'BSU') still returns valid data."""
+        data = get_wikipedia_data("BSU")
+        self.assertIn("query", data)
+
+    def test_invalid_article(self):
+        """Check that a fake article still returns a query object."""
+        data = get_wikipedia_data("ThisArticleDoesNotExist123456")
         self.assertIn("query", data)
 
 unittest.main()
