@@ -1,46 +1,42 @@
-#Authors: Troy House, Joshua Leensvaart
-import sys
+import json
+import ssl
+import urllib.request
+import urllib.error
 import argparse
-import requests
 
+def get_wikipedia_data(title):
+    """Fetch raw Wikipedia JSON data for a given article title."""
+    context = ssl._create_unverified_context()
+    base_url = (
+        "https://en.wikipedia.org/w/api.php?"
+        "action=query&format=json&prop=revisions"
+        f"&titles={title.replace(' ', '_')}"
+        "&rvprop=timestamp|user&rvlimit=30&redirects=1"
+    )
+    headers = {
+        "User-Agent": "TroyHouseWikiRecentBot/1.0 (troy.house@bsu.edu)"
+    }
+    req = urllib.request.Request(base_url, headers=headers)
+    with urllib.request.urlopen(req, context=context) as response:
+        raw_data = response.read().decode()
+        return json.loads(raw_data)
 
-#WIKI API variable
-WIKIPEDIA_API = "https://en.wikipedia.org/w/api.php"
-
-def main(argv):
-    #An argument parser to the argument for the script that will be the wiki page title
+def main():
     parser = argparse.ArgumentParser(prog="wiki_recent")
     parser.add_argument("title", help="Wikipedia article title")
-    args = parser.parse_args(argv)
+    args = parser.parse_args()
 
-    #Query parameters for the wiki page
-    params = {
-        "action": "query",
-        "format": "json",
-        "prop": "revisions",
-        "titles": args.title,
-        "rvprop": "timestamp|user",
-        "rvlimit": "30",
-        "redirects": "1"
-    }
-
-    #http header
-    headers = {
-        "User-Agent": "WikiRecentEditsBot/1.0 (troy.house@bsu.edu)"
-    }
-
-    #making a request to the page
     try:
-        response = requests.get(WIKIPEDIA_API, params=params, headers=headers, timeout=10)
-        response.raise_for_status()
-
-        # Print raw JSON
-        print(response.text)
-
-    #catches errors
-    except requests.RequestException as e:
-        print(f"Network error: {e}", file=sys.stderr)
-        sys.exit(1)
-
-main(sys.argv[1:])
+        parsed = get_wikipedia_data(args.title)
+        if "query" in parsed and "redirects" in parsed["query"]:
+            redirect_to = parsed["query"]["redirects"][0]["to"]
+            print(f"Redirected to {redirect_to}")
+        print(json.dumps(parsed, separators=(",", ":")))
+    except urllib.error.HTTPError as e:
+        print(f"HTTP error: {e.code} {e.reason}")
+    except urllib.error.URLError as e:
+        print(f"Network error: {e.reason}")
+       
+if __name__ == "__main__":
+    main()
 
