@@ -10,8 +10,8 @@ class TestWikiRecent(unittest.TestCase):
         self.assertIn("query", data)
 
     def test_redirect_article(self):
-        """Check that a redirect (like 'BSU') still returns valid data."""
-        data = get_wikipedia_data("BSU")
+        """Check that a redirect still returns valid data."""
+        data = get_wikipedia_data("USA")
         self.assertIn("query", data)
 
     def test_invalid_article(self):
@@ -20,3 +20,4 @@ class TestWikiRecent(unittest.TestCase):
         self.assertIn("query", data)
 
 unittest.main()
+
